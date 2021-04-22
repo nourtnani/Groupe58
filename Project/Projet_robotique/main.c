@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>   // prq il a du mal à include ca ?
+#include <math.h>
 
 #include "ch.h"
 #include "hal.h"
@@ -11,6 +11,8 @@
 #include <motors.h>
 #include <chprintf.h>
 #include <leds.h>
+#include <walls.h>
+#include <sensors/proximity.h>
 
 
 
@@ -33,15 +35,40 @@ static void serial_start(void)
 	sdStart(&SD3, &ser_cfg); // UART3.
 }
 
-int main(void)   // exple TP4 , à quel moment est ce qu'il sait quels paramètres prendre ?? qu'est ce qui se charge de faire le transfert de données
-				// comment ca serait possible de juste dire au moteur, directement sans machin intermediaire , "avance" ou "recule" ?
+messagebus_t bus;
+MUTEX_DECL(bus_lock);
+CONDVAR_DECL(bus_condvar);
+
+
+int main(void)
 {
     halInit();
     chSysInit();
     mpu_init();
 
+    messagebus_init(&bus, &bus_lock, &bus_condvar);
 
-    motors_init();
+	chprintf((BaseSequentialStream *) &SD3, "main1 " );
+    proximity_start();
+
+	chprintf((BaseSequentialStream *) &SD3, "main2 " );
+    systime_t time;
+
+
+    while (1)
+    {
+    	chprintf((BaseSequentialStream *) &SD3, "main " );
+    	//time = chVTGetSystemTime();
+    	verif_prox();
+
+    	//100Hz
+    	    	//chThdSleepUntilWindowed(time, time + MS2ST(10));
+    }
+
+
+
+   /* motors_init();
+
 
     int16_t speed = 180;
     systime_t time;
@@ -52,19 +79,22 @@ int main(void)   // exple TP4 , à quel moment est ce qu'il sait quels paramètres
     	right_motor_set_speed(speed);
     	left_motor_set_speed(- speed);
 
+
+
     	//100Hz
     	chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
 
 
+*/
 
 
     /* Infinite loop. */
-    while (1) {
+  /*  while (1) {
     	//waits 1 second
         chThdSleepMilliseconds(1000);
     }
-
+*/
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
