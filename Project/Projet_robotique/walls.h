@@ -8,7 +8,7 @@
 #ifndef WALLS_H_
 #define WALLS_H_
 
-
+void verif_prox (void);
 
 
 

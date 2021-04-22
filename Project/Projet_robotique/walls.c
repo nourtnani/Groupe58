@@ -1,18 +1,22 @@
 
 #include <walls.h>
-#include <proximity.h>
+#include <sensors/proximity.h>
 #include <leds.h>
 
-void verif_prox ()
-{
-	proximity_start ();
-	unsigned int sensor = 3 ;
-	int prox_s3 = get_calibrated_prox(sensor);
+#define SENSOR_IR3  	3
+#define LIM_OBSTACLE 	10
 
-	if (prox_s3 )
+
+
+void verif_prox (void)
+{
+	//proximity_start ();
+
+	if (get_prox(SENSOR_IR3) < LIM_OBSTACLE )
 	{
-		set_rgb_led (LED2, 1, 0,0);
+		set_front_led(1);
 	}
 }
+
 
 
