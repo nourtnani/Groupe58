@@ -54,6 +54,8 @@ int main(void)
     mpu_init();
     i2c_start();
     proximity_start();
+    motors_init();
+
 
     /** Inits the Inter Process Communication bus. */
     messagebus_init(&bus, &bus_lock, &bus_condvar);
@@ -61,6 +63,8 @@ int main(void)
 
     messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
     proximity_msg_t prox_values;
+    int16_t speed = 180;
+    int16_t arret = 0;
 
     while (1)
     {
@@ -78,10 +82,14 @@ int main(void)
     	if (prox_values.delta[SENSOR_IR3] > LIM_OBSTACLE )
     	{
     		set_front_led(1);
+    		right_motor_set_speed (speed);
+    		left_motor_set_speed (speed);
     	}
     	else
     	{
     		set_front_led(0);
+    		right_motor_set_speed (arret);
+    		left_motor_set_speed (arret);
     	}
     }
 
