@@ -16,9 +16,13 @@
 #define SENSOR_IR6  	5
 #define SENSOR_IR7  	6
 
+#define MOTEUR_DROITE 	0
+#define MOTEUR_GAUCHE 	1
+
 #define LIM_OBSTACLE 	200
 #define SPEED_WALK 		180
 #define SPEED_ROTATE 	150
+#define SPEED_STOP 		0
 #define ROTATION_COEFF	2
 
 

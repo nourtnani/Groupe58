@@ -32,8 +32,10 @@ void labyrinth_start(void)
 
 }
 
-uint16_t adapt_speed ()
+uint16_t * adapt_speed ()
 {
+	uint16_t speed_correction [2];
+
 	return 0;
 }
 
