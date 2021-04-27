@@ -79,15 +79,24 @@ int main(void)
     	//chprintf((BaseSequentialStream *)&SD3, "%4d,%4d,%4d,%4d,%4d,%4d,%4d,%4d\r\n\n", prox_values.ambient[0], prox_values.ambient[1], prox_values.ambient[2], prox_values.ambient[3], prox_values.ambient[4], prox_values.ambient[5], prox_values.ambient[6], prox_values.ambient[7]);
 
     	chprintf((BaseSequentialStream *) &SD3, "%d;",prox_values.delta[SENSOR_IR3]);
+    	chprintf((BaseSequentialStream *) &SD3, "%d;",prox_values.delta[SENSOR_IR4]);
     	if (prox_values.delta[SENSOR_IR3] > LIM_OBSTACLE )
     	{
     		set_front_led(1);
     		right_motor_set_speed (speed);
     		left_motor_set_speed (speed);
     	}
+    	else if  ( (prox_values.delta[SENSOR_IR4] > (LIM_OBSTACLE *3/4)) & ( prox_values.delta[SENSOR_IR3] < LIM_OBSTACLE) )
+    	{
+    		set_front_led(0);
+    		set_body_led (1);
+    		right_motor_set_speed (speed);
+    		left_motor_set_speed (speed);
+    	}
     	else
     	{
     		set_front_led(0);
+    		set_body_led (0);
     		right_motor_set_speed (arret);
     		left_motor_set_speed (arret);
     	}
