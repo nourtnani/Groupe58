@@ -51,17 +51,24 @@ int main(void)
     chSysInit();
     serial_start();
 
+    /** Inits the Inter Process Communication bus. */
+    messagebus_init(&bus, &bus_lock, &bus_condvar);
+
     mpu_init();
     i2c_start();
     proximity_start();
     motors_init();
 
 
-    /** Inits the Inter Process Communication bus. */
-    messagebus_init(&bus, &bus_lock, &bus_condvar);
 
 
-    messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
+
+   // messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
+
+    labyrinth_start();
+
+   // move_right_start();
+    /*
     proximity_msg_t prox_values;
     int16_t speed = 180;
     int16_t arret = 0;
@@ -101,6 +108,7 @@ int main(void)
     		left_motor_set_speed (arret);
     	}
     }
+    */
 
    // *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
 
