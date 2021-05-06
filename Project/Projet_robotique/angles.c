@@ -29,6 +29,10 @@ double angle_to_step(int angle)
     return (TOUR_COMPLET/CERCLE)*constrainAngle(angle);
 }
 
+int distance_to_step(float distance)
+{
+    return (10/257.6)*distance ;
+}
 
 void rotate_to_angle(int angle)
 {
@@ -137,8 +141,8 @@ void adapt_speed (int cas)
 
 void avance_valeur (int valeur)
 {
-	right_motor_set_pos (0);
-	left_motor_set_pos (0);
+	right_motor_set_pos (SPEED_STOP);
+	left_motor_set_pos (SPEED_STOP);
 	while (right_motor_get_pos()<= valeur)
 	{
 		right_motor_set_speed (SPEED_WALK);
@@ -146,3 +150,49 @@ void avance_valeur (int valeur)
 	}
 }
 
+
+void go(float distance_in_cm)
+{
+	int right_motor_counter=right_motor_get_pos();
+    int steps = distance_to_step(distance_in_cm);
+
+        //        turn left
+        // 1 rot = 1000 steps --> tour complet = 4000 steps
+        // pour faire un tour complet il faut 4000 step sur un droite et -4000 sur gauche
+        right_motor_set_speed(+100);
+        left_motor_set_speed(+100);
+        while (right_motor_get_pos()<(right_motor_counter+steps))
+        {
+            chThdSleep(10);
+            chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
+        }
+        right_motor_set_speed(0);
+        left_motor_set_speed(0);
+
+}
+
+
+int check_shoulder(){
+	float treshold_1 = 0.5; // à determiner experimentalement
+	float noise_1;
+	float treshold_2 = 2;
+	float noise_2;
+	float treshold_3 = 0.2;
+	float noise_3;
+
+	if (get_prox(1) > treshold_1){
+		// turn a bit left
+
+	}
+	if (get_prox(1)< treshold_1){
+		// turn a bit right
+		if (get_prox(2)>treshold_2){
+			return get_prox(2)-treshold_2;
+		}
+		if (get_prox(1)<noise_1 && get_prox(2)<noise_2){
+			// routine 90° left
+		} //si aucun capteur return 0
+	}
+	return (get_prox(1)-treshold_1);
+			// * une constante pour obtenir un angle
+}
