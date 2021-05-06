@@ -28,7 +28,7 @@
 		<link>
 			<name>e-puck2_main-processor</name>
 			<type>2</type>
-			<location>C:/Users/nourt/Desktop/EPFL/etudes/Bachelor_6/systemes_embarques_et_robotique/Projet/lib/e-puck2_main-processor</location>
+			<location>/Users/zakarysouid/Documents/GitHub/Projet/lib/e-puck2_main-processor</location>
 		</link>
 	</linkedResources>
 </projectDescription>
