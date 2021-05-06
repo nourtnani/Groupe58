@@ -6,6 +6,7 @@
 
 #include <walls.h>
 #include <angles.h>
+#include <main.h>
 #include <sensors/proximity.h>
 #include <leds.h>
 #include <msgbus/messagebus.h>
@@ -17,15 +18,15 @@
 //https://stackoverflow.com/questions/11498169/dealing-with-angle-wrap-in-c-code
 double constrainAngle(double x)
 {
-    x = fmod(x + 180,360);
-    if (x < 0)
-        x += 360;
-    return x - 180;
+    x = fmod(x + DEMI_CERCLE,CERCLE);
+    if (x < 0)  x += CERCLE;
+
+    return x - DEMI_CERCLE;
 }
 
-int angle_to_step(int angle)
+double angle_to_step(int angle)
 {
-    return (1290/360)*constrainAngle(angle);
+    return (TOUR_COMPLET/CERCLE)*constrainAngle(angle);
 }
 
 
@@ -40,31 +41,31 @@ void rotate_to_angle(int angle)
     	//	41 mm --> 128 de perim
     	// 1 rot = 1000 steps --> tour complet = 1290 steps
     	// pour faire un tour complet il faut 1290 step sur un gauche et -1290 sur droite
-        right_motor_set_speed(-100);
-        left_motor_set_speed(+100);
+        right_motor_set_speed(-SPEED_WALK);
+        left_motor_set_speed(+SPEED_WALK);
         while (right_motor_get_pos()>(5000+steps))
         {
             chThdSleep(10);
             chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
 
         }
-        right_motor_set_speed(0);
-        left_motor_set_speed(0);
+        right_motor_set_speed(SPEED_STOP);
+        left_motor_set_speed(SPEED_STOP);
     }
     else
     {
         //        turn left
-        // 1 rot = 1000 steps --> tour complet = 4000 steps
-        // pour faire un tour complet il faut 4000 step sur un droite et -4000 sur gauche
-        right_motor_set_speed(+100);
-        left_motor_set_speed(-100);
+        // 1 rot = 1000 steps --> tour complet = 1290 steps
+        // pour faire un tour complet il faut 1290 step sur un droite et -1290 sur gauche
+        right_motor_set_speed(+SPEED_WALK);
+        left_motor_set_speed(-SPEED_WALK);
         while (right_motor_get_pos()<(5000+steps))
         {
             chThdSleep(10);
             chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
         }
-        right_motor_set_speed(0);
-        left_motor_set_speed(0);
+        right_motor_set_speed(SPEED_STOP);
+        left_motor_set_speed(SPEED_STOP);
     }
 }
 
@@ -109,10 +110,39 @@ void rotate_to_sensor(int sensor)
     }
 }
 
-void init(void)
+void adapt_speed (int cas)
 {
+	switch (cas)
+	{
+	case KEEP_STRAIGHT :
+		right_motor_set_speed (SPEED_WALK);
+		left_motor_set_speed (SPEED_WALK);
+		break;
 
+	case TURN_LEFT :
+		rotate_to_angle (A_TURN_LEFT);
+		break;
+
+	case TURN_RIGHT :
+		rotate_to_angle (A_TURN_RIGHT);
+		break;
+
+	case STOP :
+		right_motor_set_speed (SPEED_STOP);
+		left_motor_set_speed (SPEED_STOP);
+		break;
+	}
 
 }
 
+void avance_valeur (int valeur)
+{
+	right_motor_set_pos (0);
+	left_motor_set_pos (0);
+	while (right_motor_get_pos()<= valeur)
+	{
+		right_motor_set_speed (SPEED_WALK);
+		left_motor_set_speed (SPEED_WALK);
+	}
+}
 
