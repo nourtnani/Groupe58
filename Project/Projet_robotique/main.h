@@ -39,9 +39,9 @@ extern "C" {
 #define TURN_RIGHT				2
 #define STOP					3
 
-#define LIM_OBSTACLE 			200
-#define LIM_OBSTACLE_AD			10
-#define LIM_OBSTACLE_FACE		2150
+#define LIM_OBSTACLE 			700
+#define LIM_OBSTACLE_AD			120
+#define LIM_OBSTACLE_FACE		1600
 #define SPEED_WALK 				200
 #define SPEED_ROTATE 			150
 #define SPEED_STOP 				0
@@ -58,6 +58,12 @@ extern "C" {
 #define PERIM_ROUE				PI*DIAM_ROUE
 #define TOUR_COMPLET			1300.
 
+#define GOAL_DISTANCE 			1.0f
+#define MAX_DISTANCE 			25.0f
+#define ERROR_THRESHOLD			0.1f	//[cm] because of the noise of the camera
+#define KP						600.0f
+#define KI 						3.5f	//must not be zero
+#define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT/KI)
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

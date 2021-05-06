@@ -172,27 +172,3 @@ void go(float distance_in_cm)
 }
 
 
-int check_shoulder(){
-	float treshold_1 = 0.5; // à determiner experimentalement
-	float noise_1;
-	float treshold_2 = 2;
-	float noise_2;
-	float treshold_3 = 0.2;
-	float noise_3;
-
-	if (get_prox(1) > treshold_1){
-		// turn a bit left
-
-	}
-	if (get_prox(1)< treshold_1){
-		// turn a bit right
-		if (get_prox(2)>treshold_2){
-			return get_prox(2)-treshold_2;
-		}
-		if (get_prox(1)<noise_1 && get_prox(2)<noise_2){
-			// routine 90° left
-		} //si aucun capteur return 0
-	}
-	return (get_prox(1)-treshold_1);
-			// * une constante pour obtenir un angle
-}
