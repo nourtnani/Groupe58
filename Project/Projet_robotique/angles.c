@@ -4,13 +4,13 @@
 #include <usbcfg.h>
 #include <chprintf.h>
 
-#include <walls.h>
 #include <angles.h>
 #include <main.h>
 #include <sensors/proximity.h>
 #include <leds.h>
 #include <msgbus/messagebus.h>
 #include <motors.h>
+#include "path_check.h"
 
 
 
@@ -114,13 +114,13 @@ void rotate_to_sensor(int sensor)
     }
 }
 
-void adapt_speed (int cas)
+void adapt_speed (int cas , int16_t speed_correction)
 {
 	switch (cas)
 	{
 	case KEEP_STRAIGHT :
-		right_motor_set_speed (SPEED_WALK);
-		left_motor_set_speed (SPEED_WALK);
+		right_motor_set_speed (SPEED_WALK - ROTATION_COEFF * speed_correction);
+		left_motor_set_speed (SPEED_WALK + ROTATION_COEFF * speed_correction);
 		break;
 
 	case TURN_LEFT :
@@ -139,36 +139,18 @@ void adapt_speed (int cas)
 
 }
 
-void avance_valeur (int valeur)
+void avance_valeur (int valeur , int16_t speed_correction)
 {
 	right_motor_set_pos (SPEED_STOP);
 	left_motor_set_pos (SPEED_STOP);
 	while (right_motor_get_pos()<= valeur)
 	{
-		right_motor_set_speed (SPEED_WALK);
-		left_motor_set_speed (SPEED_WALK);
+		right_motor_set_speed (SPEED_WALK - ROTATION_COEFF * speed_correction);
+		left_motor_set_speed (SPEED_WALK - ROTATION_COEFF * speed_correction);
 	}
+	right_motor_set_speed (SPEED_STOP);
+	left_motor_set_speed (SPEED_STOP);
 }
 
-
-void go(float distance_in_cm)
-{
-	int right_motor_counter=right_motor_get_pos();
-    int steps = distance_to_step(distance_in_cm);
-
-        //        turn left
-        // 1 rot = 1000 steps --> tour complet = 4000 steps
-        // pour faire un tour complet il faut 4000 step sur un droite et -4000 sur gauche
-        right_motor_set_speed(+100);
-        left_motor_set_speed(+100);
-        while (right_motor_get_pos()<(right_motor_counter+steps))
-        {
-            chThdSleep(10);
-            chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
-        }
-        right_motor_set_speed(0);
-        left_motor_set_speed(0);
-
-}
 
 

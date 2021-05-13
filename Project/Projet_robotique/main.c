@@ -10,13 +10,13 @@
 #include <main.h>
 #include <motors.h>
 #include <leds.h>
-#include <walls.h>
 #include <angles.h>
 #include <sensors/proximity.h>
 #include <msgbus/messagebus.h>
 #include <chmtx.h>
 #include <chprintf.h>
 #include <i2c_bus.h>
+#include "path_check.h"
 
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
@@ -59,9 +59,11 @@ int main(void)
     i2c_start();
     proximity_start();
     calibrate_ir();
+
     motors_init();
 
    // verif ();
+
 
 
 

@@ -4,13 +4,13 @@
 #include <usbcfg.h>
 #include <chprintf.h>
 
-#include <walls.h>
 #include <angles.h>
 #include <main.h>
 #include <leds.h>
 #include <msgbus/messagebus.h>
 #include <motors.h>
 #include <sensors/imu.h>
+#include "path_check.h"
 
 
     imu_start();
