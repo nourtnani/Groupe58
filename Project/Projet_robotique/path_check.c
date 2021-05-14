@@ -57,10 +57,8 @@ static THD_FUNCTION(MoveRight, arg)
 
     	while (stay_on_your_right()==true)
     	{
-    		set_led(LED1, 1);
     		if (to_the_left()==true)
     		{
-    			set_front_led(1);
     			adapt_speed(TURN_LEFT , check_shoulder());
     		}
     		adapt_speed(KEEP_STRAIGHT , check_shoulder());
@@ -73,7 +71,6 @@ static THD_FUNCTION(MoveRight, arg)
     	}
 		if ((see_nothing() == true) && (second_turn ==1))
 		{
-        	set_body_led(1);
         	avance_valeur (AVANCE_POUR_TOURNER , SPEED_STOP);
 			adapt_speed (KEEP_STRAIGHT , check_shoulder());
 			second_turn = 0;

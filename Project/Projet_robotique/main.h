@@ -39,7 +39,7 @@ extern "C" {
 #define LIM_OBSTACLE 			300
 #define LIM_OBSTACLE_FACE		1600
 #define NOISE 					100
-#define NOISE_IR3				300
+#define NOISE_IR3				400
 
 #define SPEED_WALK 				200
 #define SPEED_STOP 				0

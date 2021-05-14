@@ -12,11 +12,16 @@
 #include <leds.h>
 #include <angles.h>
 #include <sensors/proximity.h>
+#include <sensors/imu.h>
 #include <msgbus/messagebus.h>
+#include <audio/play_melody.h>
+#include <audio/microphone.h>
+#include <audio/audio_thread.h>
 #include <chmtx.h>
 #include <chprintf.h>
 #include <i2c_bus.h>
 #include "path_check.h"
+#include "path_exit.h"
 
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
@@ -54,17 +59,21 @@ int main(void)
 
     /** Inits the Inter Process Communication bus. */
     messagebus_init(&bus, &bus_lock, &bus_condvar);
-
     mpu_init();
     i2c_start();
     proximity_start();
     calibrate_ir();
+    imu_start();
+    calibrate_gyro();
+    calibrate_acc();
+	//mic_start(NULL);
+    dac_start();
+    playMelodyStart();
+
 
     motors_init();
 
    // verif ();
-
-
 
 
    // messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
@@ -72,6 +81,7 @@ int main(void)
    // labyrinth_start();
 
     move_right_start();
+    fall_monitoring_start();
 
 }
 
