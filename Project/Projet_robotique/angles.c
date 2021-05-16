@@ -13,9 +13,12 @@
 #include "path_check.h"
 
 
+/**
+* @brief   Function used to convert an angle value to one between -180° and 180°.
+* 			code taken from //https://stackoverflow.com/questions/11498169/dealing-with-angle-wrap-in-c-code
+* 			as is.
+*/
 
-
-//https://stackoverflow.com/questions/11498169/dealing-with-angle-wrap-in-c-code
 double constrainAngle(double x)
 {
     x = fmod(x + DEMI_CERCLE,CERCLE);
@@ -31,12 +34,12 @@ double angle_to_step(int angle)
 
 int distance_to_step(float distance)
 {
-    return (10/257.6)*distance ;
+    return (STEPS_ROT/WHEEL_PERIMETER)*distance ;
 }
 
 void rotate_to_angle(int angle)
 {
-    right_motor_set_pos(5000);
+    right_motor_set_pos(COUNTER_INIT);
     int steps = angle_to_step(angle);
     if (steps<0)
     {
@@ -47,7 +50,7 @@ void rotate_to_angle(int angle)
     	// pour faire un tour complet il faut 1290 step sur un gauche et -1290 sur droite
         right_motor_set_speed(-SPEED_WALK);
         left_motor_set_speed(+SPEED_WALK);
-        while (right_motor_get_pos()>(5000+steps))
+        while (right_motor_get_pos()>(COUNTER_INIT+steps))
         {
             chThdSleep(10);
           //  chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
@@ -63,7 +66,7 @@ void rotate_to_angle(int angle)
         // pour faire un tour complet il faut 1290 step sur un droite et -1290 sur gauche
         right_motor_set_speed(+SPEED_WALK);
         left_motor_set_speed(-SPEED_WALK);
-        while (right_motor_get_pos()<(5000+steps))
+        while (right_motor_get_pos()<(COUNTER_INIT+steps))
         {
             chThdSleep(10);
           //  chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
@@ -106,6 +109,14 @@ void rotate_to_sensor(int sensor)
     }
 }
 
+void glue_shoulder(void)
+{
+	while(init_prox()!=SENSOR_IR3)
+	{
+		rotate_to_angle(A_SENSOR_IR8);
+	}
+}
+
 void adapt_speed (int cas , int16_t speed_correction)
 {
 	switch (cas)
@@ -113,14 +124,6 @@ void adapt_speed (int cas , int16_t speed_correction)
 	case KEEP_STRAIGHT :
 		right_motor_set_speed (SPEED_WALK - ROTATION_COEFF * speed_correction);
 		left_motor_set_speed (SPEED_WALK + ROTATION_COEFF * speed_correction);
-		break;
-
-	case TURN_LEFT :
-		rotate_to_angle (A_TURN_LEFT);
-		break;
-
-	case TURN_RIGHT :
-		rotate_to_angle (A_TURN_RIGHT);
 		break;
 
 	case STOP :
@@ -131,7 +134,7 @@ void adapt_speed (int cas , int16_t speed_correction)
 
 }
 
-void avance_valeur (int valeur , int16_t speed_correction)
+void move (int valeur , int16_t speed_correction)
 {
 	right_motor_set_pos (SPEED_STOP);
 	left_motor_set_pos (SPEED_STOP);

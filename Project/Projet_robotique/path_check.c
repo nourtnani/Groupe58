@@ -7,6 +7,7 @@
 
 #include <msgbus/messagebus.h>
 #include <sensors/proximity.h>
+#include <sensors/VL53L0X/VL53L0X.h>
 #include <main.h>
 #include <angles.h>
 
@@ -22,13 +23,15 @@ void labyrinth_start(void)
 {
 	int number = init_prox();
     rotate_to_sensor(number);
-//    avancer jusqu'à l'obstacle
-    //rotate_to_sensor(SENSOR_IR6);
-  //  while(init_prox()!=2)
-  //  {
-   // 	rotate_to_angle(-20);
-  //  }
-    set_body_led(1);
+
+	chprintf((BaseSequentialStream *)&SD3, " TOF ",VL53L0X_get_dist_mm() );
+	int distanceTOF=VL53L0X_get_dist_mm();
+	if (distanceTOF<100){
+    move(distance_to_step((distanceTOF)/10-1),SPEED_STOP);
+	}
+    glue_shoulder();
+    set_front_led(1);
+    VL53L0X_stop();
 }
 
 
@@ -43,8 +46,6 @@ static THD_FUNCTION(MoveRight, arg)
     messagebus_topic_t *proximity_topic = messagebus_find_topic_blocking(&bus, "/proximity");
     adapt_speed (STOP , check_shoulder());
 
-	static unsigned int second_turn = 0;
-	static unsigned int start = 0;
 
     while(1)
     {
@@ -52,29 +53,18 @@ static THD_FUNCTION(MoveRight, arg)
 
     	messagebus_topic_wait(proximity_topic, &proximity_values, sizeof(proximity_values));
 
-        adapt_speed (STOP , check_shoulder());
+      //  adapt_speed (STOP , check_shoulder());
 
-    	while (stay_on_your_right()==true)
+    	while (1)//(stay_on_your_right()==true)
     	{
     		if (to_the_left()==true)
     		{
-    			adapt_speed(TURN_LEFT , check_shoulder());
+    			glue_shoulder();
     		}
     		adapt_speed(KEEP_STRAIGHT , check_shoulder());
-    		start = 1;
+
     	}
-    	if (start == 1)
-    	{
-    		adapt_speed (KEEP_STRAIGHT, check_shoulder());
-    		second_turn = 1;
-    	}
-		if ((see_nothing() == true) && (second_turn ==1))
-		{
-        	avance_valeur (AVANCE_POUR_TOURNER , SPEED_STOP);
-			adapt_speed (KEEP_STRAIGHT , check_shoulder());
-			second_turn = 0;
-		}
- 		start = 0;
+
 
         /*
          * if the line is nearly in front of an edge, slow down to turn
@@ -113,7 +103,6 @@ uint8_t init_prox(void)
     			number=i;
     		}
     	}
-    	//chThdSleep(10);
     }
     return number;
 }
@@ -121,79 +110,49 @@ uint8_t init_prox(void)
 
 bool to_the_left (void)
 {
-	return ((get_prox(SENSOR_IR1) > LIM_OBSTACLE_FACE ) && (get_prox(SENSOR_IR8) > LIM_OBSTACLE_FACE ) );
+	return (get_prox(SENSOR_IR1)+get_prox(SENSOR_IR8) > 2*LIM_OBSTACLE_FACE );
 }
-
-bool stay_on_your_right (void)
-{
-	return (get_prox(SENSOR_IR3) > LIM_OBSTACLE ) ;
-}
-
-bool see_nothing (void)
-{
-	return ((get_prox(SENSOR_IR3) < NOISE_IR3 ) && (get_prox(SENSOR_IR2) < NOISE ) );
-}
-
 
 int check_shoulder(void)
 {
-	float treshold_IR2 		= 700;
-	float noise_IR2 		= 160;
-	float treshold_IR3 		= 2350;
-	float noise_IR3 		= 250;
-	float treshold_IR4 		= 400;
-	float noise_IR4			= 100;
-	float max_1				= 1100;
-	float speedk 			= 50;
 
 	enum sense {nothing, far, close};
 	enum sense eye;
 	enum sense shoulder;
-	enum sense back;
 
-	if (get_prox(SENSOR_IR2) > treshold_IR2)
+	if (get_prox(SENSOR_IR2) > GOAL_IR2)
 	{
 		eye=close;
 	}
-	else if (get_prox(SENSOR_IR2) < noise_IR2)
+	else if (get_prox(SENSOR_IR2) < NOISE_IR2)
 	{
 		eye=nothing;
 	}
 	else eye=far;
 
-	if (get_prox(SENSOR_IR3) > treshold_IR3)
+	if (get_prox(SENSOR_IR3) > GOAL_IR3)
 	{
 		shoulder=close;
 	}
-	else if (get_prox(SENSOR_IR3) < noise_IR3)
+	else if (get_prox(SENSOR_IR3) < NOISE_IR3)
 	{
 		shoulder=nothing;
 	}
 	else shoulder=far;
 
-	if (get_prox(SENSOR_IR4) > treshold_IR4)
-	{
-		back=close;
-	}
-	else if (get_prox(SENSOR_IR4) < noise_IR4)
-	{
-		back=nothing;
-	}
-	else back=far;
+	int speed;
 
-	if (eye==nothing && shoulder==nothing && back==nothing) 		 // he is somewhere, no obstacles
-	{
-		return SPEED_STOP;
-	}
 	if (eye==close)													  // too close to the wall, turn a bit left
 	{
-		return (get_prox(SENSOR_IR2)-treshold_IR2)/(treshold_IR2-max_1)*speedk;
+		speed=(get_prox(SENSOR_IR2)-GOAL_IR2)/(GOAL_IR2-MAX_IR2)*SPEEDK;
+		if (speed<-SPEEDK){speed=-SPEEDK;}
+		return speed;
 	}
 	if (eye==far && shoulder==far)									// voit qu'il est un peu loin avec son oeil
 																	// sent qu'il est trop loin du mur mais le voit encore
 																	// turn a bit right something positive
 	{
-		return (treshold_IR2-get_prox(SENSOR_IR2))/(treshold_IR2-noise_IR2)*speedk;
+		return (GOAL_IR2-get_prox(SENSOR_IR2))/(GOAL_IR2-NOISE_IR2)*SPEEDK;
 	}
 
 
@@ -201,11 +160,10 @@ int check_shoulder(void)
 	{
 		if (shoulder==close)									//mais sent avec son epaule
 		{
-			return (treshold_IR3-get_prox(SENSOR_IR3))/(treshold_IR3-noise_IR3);
+			return SPEED_STOP;
 		}
-		if (((shoulder==far)) || ((shoulder == nothing)&& back == far))
-		{
-			return (treshold_IR3-get_prox(SENSOR_IR3))/(treshold_IR3-noise_IR3)*speedk*ROTATION_COEFF;
+		else{
+			return SPEEDK;
 		}
 
 	}

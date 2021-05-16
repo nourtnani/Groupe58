@@ -17,6 +17,7 @@
 #include <audio/play_melody.h>
 #include <audio/microphone.h>
 #include <audio/audio_thread.h>
+#include <sensors/VL53L0X/VL53L0X.h>
 #include <chmtx.h>
 #include <chprintf.h>
 #include <i2c_bus.h>
@@ -58,8 +59,10 @@ int main(void)
     messagebus_init(&bus, &bus_lock, &bus_condvar);
     mpu_init();
     i2c_start();
+	VL53L0X_start();
     proximity_start();
     calibrate_ir();
+
     imu_start();
     calibrate_gyro();
     calibrate_acc();

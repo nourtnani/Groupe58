@@ -27,7 +27,7 @@
 imu_msg_t imu_values;
 
 
-static THD_WORKING_AREA(waFallMonitoring, 512);
+static THD_WORKING_AREA(waFallMonitoring, 1024);
 static THD_FUNCTION(FallMonitoring, arg)
 {
 	chRegSetThreadName(__FUNCTION__);
@@ -36,8 +36,9 @@ static THD_FUNCTION(FallMonitoring, arg)
 	systime_t time;
 	messagebus_topic_t *imu_topic = messagebus_find_topic_blocking(&bus, "/imu");
 
-	int16_t threshold_acc = -3000 ;
-	int16_t threshold_gyro = 6000 ;
+	float threshold_acc = -6.5 ;
+	float threshold_gyro = 0.17f ;
+	float init_gyro = get_gyro_rate(X_AXIS);
 
 	while(1)
 	{
@@ -45,19 +46,26 @@ static THD_FUNCTION(FallMonitoring, arg)
         //wait for new measures to be published
         messagebus_topic_wait(imu_topic, &imu_values, sizeof(imu_values));
 
-        chprintf((BaseSequentialStream *)&SD3, "%Ax=%-7d Ay=%-7d Az=%-7d Gx=%-7d Gy=%-7d Gz=%-7d\r\n",
-                get_acc(X_AXIS), get_acc(Y_AXIS), get_acc(Z_AXIS),
-				get_gyro(X_AXIS), get_gyro(Y_AXIS), get_gyro(Z_AXIS));
-
-        if ((get_acc(Y_AXIS) < threshold_acc) && (get_gyro(X_AXIS) > threshold_gyro))
+        chprintf((BaseSequentialStream *)&SD3, "%Ax=%6f Ay=%6f Az=%6f Gx=%6f Gy=%6f Gz=%6f\r\n",
+                get_acceleration(X_AXIS), get_acceleration(Y_AXIS), get_acceleration(Z_AXIS),
+				get_gyro_rate(X_AXIS), get_gyro_rate(Y_AXIS), get_gyro_rate(Z_AXIS));
+        stopCurrentMelody();
+        if (abs( get_gyro_rate(X_AXIS) - init_gyro)  >threshold_gyro )
         {
                 adapt_speed (STOP , SPEED_STOP);
-            	playMelody(WE_ARE_THE_CHAMPIONS , ML_FORCE_CHANGE , NULL);
+            	playMelody(MARIO_DEATH , ML_FORCE_CHANGE , NULL);
             	waitMelodyHasFinished();
-                adapt_speed (STOP , SPEED_STOP);
+                while(1)
+                {
+                    adapt_speed (STOP , SPEED_STOP);
+
+                }
         }
 
-    	else   stopCurrentMelody();
+    	else
+    	{
+    		stopCurrentMelody();
+    	}
 	}
 
     //100Hz

@@ -68,6 +68,14 @@ int check_shoulder(void) ;
 */
 void labyrinth_start(void);
 
+/**
+* @brief   Starts the resolution of the labyrinth.
+* 			The robot only moves when there is a close wall on its right.
+* 			Therefore, the condition for it to move is that it has already moved along the wall before.
+* 			Once this is verified, the robot adapts its speed with check_shoulder.
+* 			We need to have two other cases, as the robot is not close to the wall when it turns to the right.
+* 			Also, when turning right and having then
+*/
 void move_right_start(void);
 
 void verif (void);
