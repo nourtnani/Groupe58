@@ -41,28 +41,17 @@ void rotate_to_angle(int angle)
 {
     right_motor_set_pos(COUNTER_INIT);
     int steps = angle_to_step(angle);
-    if (steps<0) //turn right
+    if (steps<0)						 //turn right
     {
         right_motor_set_speed(-SPEED_WALK);
         left_motor_set_speed(+SPEED_WALK);
-        while (right_motor_get_pos()>(COUNTER_INIT+steps))
-        {
-          //  chThdSleep(10);
-
-        }
-        right_motor_set_speed(SPEED_STOP);
-        left_motor_set_speed(SPEED_STOP);
+        while (right_motor_get_pos()>(COUNTER_INIT+steps)) 	 {}
     }
-    else //turn left
+    else 								//turn left
     {
         right_motor_set_speed(+SPEED_WALK);
         left_motor_set_speed(-SPEED_WALK);
-        while (right_motor_get_pos()<(COUNTER_INIT+steps))
-        {
-          //  chThdSleep(10);
-        }
-        right_motor_set_speed(SPEED_STOP);
-        left_motor_set_speed(SPEED_STOP);
+        while (right_motor_get_pos()<(COUNTER_INIT+steps))	 {}
     }
 }
 
@@ -101,26 +90,16 @@ void rotate_to_sensor(int sensor)
 
 void glue_shoulder(void)
 {
-	while(init_prox()!=SENSOR_IR3) //if the sensor giving back the highest value is not the IR3, keep rotating
+	while(init_prox()!=SENSOR_IR3) 		//if the sensor giving back the highest value is not the IR3, keep rotating
 	{
 		rotate_to_angle(A_SENSOR_IR8);
 	}
 }
 
-void adapt_speed (int cas , int16_t speed_correction)
+void adapt_speed (int16_t speed_correction)
 {
-	switch (cas)
-	{
-	case KEEP_STRAIGHT :
 		right_motor_set_speed (SPEED_WALK - ROTATION_COEFF * speed_correction);
 		left_motor_set_speed (SPEED_WALK + ROTATION_COEFF * speed_correction);
-		break;
-
-	case STOP :
-		right_motor_set_speed (SPEED_STOP);
-		left_motor_set_speed (SPEED_STOP);
-		break;
-	}
 
 }
 

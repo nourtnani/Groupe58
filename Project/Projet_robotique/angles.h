@@ -6,13 +6,19 @@
  *
  */
 
+/*
+ * The goal of this module is to control the geometric properties of the program:
+ * It allows the rotation of the motor
+ * It allows the motor to move forward
+ */
+
 #ifndef ANGLES_H_
 #define ANGLES_H_
 
 /**
 * @brief   convert an angle to a number of step the robot should do to rotate
 */
-double angle_to_step(int angle);
+int angle_to_step(int angle);
 
 /**
 * @brief  	Function used to convert a distance into a number of steps
@@ -29,7 +35,7 @@ void rotate_to_angle(int angle);
 
 /**
 * @brief   Function used to tell the robot to put his head where a given sensor previously was
-* 			Uses rotate_to_angle and the different angles where each sensor is located to.
+* 			Uses rotate_to_angle and the different angles where each sensor is located.
 */
 void rotate_to_sensor(int sensor);
 
@@ -44,17 +50,17 @@ void glue_shoulder(void);
 
 /**
 * @brief   Function dealing with the speed of the robot and compensating its direction
-* 			The function has a few different modes, allowing to take different decision
+* 			The function has a few different modes, allowing to take different decisions
 * 			and applying the correction factor depending on what the front and side sensors are feeling.
 * 			Speed_correction allows angular correction so the robot can follow a wall.
 */
-void adapt_speed (int cas, int16_t speed_correction);
+void adapt_speed (int16_t speed_correction);
 
 /**
 * @brief   Function used to tell the robot to go straight for a specified number of step
 * 			Speed_correction allows angular correction so the robot can follow a wall.
 */
-void move (int valeur , int16_t speed_correction);
+void move (float valeur , int16_t speed_correction);
 
 
 #endif /* ANGLES_H_ */

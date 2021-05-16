@@ -43,7 +43,6 @@ static THD_FUNCTION(MoveRight, arg)
 
     systime_t time;
     messagebus_topic_t *proximity_topic = messagebus_find_topic_blocking(&bus, "/proximity");
-    adapt_speed (STOP , check_shoulder());
 
 
     while(1)
@@ -58,7 +57,7 @@ static THD_FUNCTION(MoveRight, arg)
     		{
     			glue_shoulder();
     		}
-    		adapt_speed(KEEP_STRAIGHT , check_shoulder());
+    		adapt_speed(check_shoulder());
     	}
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
@@ -69,7 +68,7 @@ void move_right_start(void)
 	chThdCreateStatic(waMoveRight, sizeof(waMoveRight), NORMALPRIO, MoveRight, NULL);
 }
 
-static int init_prox(void)
+int init_prox(void)
 {
 	 messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
 	 messagebus_topic_wait(prox_topic, &proximity_values, sizeof(proximity_values));
@@ -93,13 +92,12 @@ static int init_prox(void)
 }
 
 
-static bool to_the_left (void)
+bool to_the_left (void)
 {
-//	return (get_prox(SENSOR_IR1)+get_prox(SENSOR_IR8) > 2*LIM_OBSTACLE_FACE );
-    return (VL53L0X_get_dist_mm()<LIM_OBSTACLE_FACE);
+	return ((get_prox(SENSOR_IR1)+get_prox(SENSOR_IR8))/2 > LIM_OBSTACLE_FACE );  //Comparison between the average value and the threshold
 }
 
-static int check_shoulder(void)
+int check_shoulder(void)
 {
 
 	enum sense {nothing, far, close};
@@ -130,18 +128,24 @@ static int check_shoulder(void)
 
 	float speed;
     
-    // comparaisons and calculations of booleans
+    // comparisons and calculations of booleans
 
-	if (eye==close)											// too close to the wall, has to turn a bit left
+	if (eye==close)														// too close to the wall, has to turn a bit left
 	{
 		speed=(get_prox(SENSOR_IR2)-GOAL_IR2)/(GOAL_IR2-MAX_IR2);
-		if (speed < - MAX_SPEED_MOD){speed = - MAX_SPEED_MOD;}                            // avoid to have speed above SPEEDK
+		if (speed < - MAX_SPEED_MOD)
+		{
+			speed = - MAX_SPEED_MOD;
+		}                            // avoid to have speed above SPEEDK
 		return SPEEDK*speed;
 	}
 	if (eye==far && shoulder==far)                          // too far from the wall, has to turn a bit right
 	{
         speed=(GOAL_IR2-get_prox(SENSOR_IR2))/(GOAL_IR2-NOISE_IR2);
-        if (speed > MAX_SPEED_MOD ){speed = MAX_SPEED_MOD;}                              // avoid to have speed above SPEEDK
+        if (speed > MAX_SPEED_MOD )
+        {
+        	speed = MAX_SPEED_MOD;
+        }                              // avoid to have speed above SPEEDK
 		return  SPEEDK * speed;
 	}
 
@@ -152,7 +156,8 @@ static int check_shoulder(void)
 		{
 			return SPEED_STOP;                  //goes straight
 		}
-		else{
+		else
+		{
 			return SPEEDK;                      // optimal speed to do a rotation around a point 1cm away
 		}
 

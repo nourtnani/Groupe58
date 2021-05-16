@@ -29,18 +29,17 @@ extern "C" {
 #define A_SENSOR_IR7		 	50
 #define A_SENSOR_IR8		 	20
 
-#define KEEP_STRAIGHT			0
-#define STOP					3
-
-#define LIM_OBSTACLE_FACE		1600.0f
+#define LIM_OBSTACLE_FACE		1500
 #define GOAL_IR2 				510.0f
 #define NOISE_IR2 				135.0f
 #define GOAL_IR3 				1670.0f
 #define NOISE_IR3 				200.0f
 #define MAX_IR2					1100.0f
-#define SPEEDK 					65.0f
 
-#define SPEED_WALK 				200
+#define SPEED					2
+#define SPEEDK 					SPEED*65.0f
+#define SPEED_WALK 				SPEED*200
+
 #define SPEED_STOP 				0
 #define ROTATION_COEFF			2
 
@@ -53,6 +52,11 @@ extern "C" {
 #define STEPS_ROT				1000
 #define WHEEL_PERIMETER			12.9
 
+#define NB_SENSORS				8
+#define MAX_SPEED_MOD			1
+#define MM_TO_CM				10
+#define DISTANCE_TOF_MAX		100
+#define ANGULAR_ACC_DEATH		2.0f
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
 

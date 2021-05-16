@@ -53,26 +53,27 @@ int main(void)
 {
     halInit();
     chSysInit();
+    // starts the serial communication
     serial_start();
-
-    /** Inits the Inter Process Communication bus. */
+    // inits the Inter Process Communication bus.
     messagebus_init(&bus, &bus_lock, &bus_condvar);
-    mpu_init();
+    // inits the I2C communication
     i2c_start();
+    //inits the captors
+    mpu_init();
 	VL53L0X_start();
     proximity_start();
-    calibrate_ir();
-
     imu_start();
+    // starts the calibration of the sensors
+    calibrate_ir();
     calibrate_gyro();
     calibrate_acc();
+    // starts the buffer and the melody thread
     dac_start();
     playMelodyStart();
-
+    // inits the motor
     motors_init();
-
-   // verif ();
-
+    // starts the labyrinth resolution threads
     labyrinth_start();
     move_right_start();
     fall_monitoring_start();
