@@ -23,14 +23,13 @@ void labyrinth_start(void)
 {
 	int number = init_prox();
     rotate_to_sensor(number);
-
-	chprintf((BaseSequentialStream *)&SD3, " TOF ",VL53L0X_get_dist_mm() );
 	int distanceTOF=VL53L0X_get_dist_mm();
-	if (distanceTOF<100){
-    move(distance_to_step((distanceTOF)/10-1),SPEED_STOP);
+	if (distanceTOF<DISTANCE_TOF_MAX)
+    {
+        move(distance_to_step((distanceTOF)/MM_TO_CM),SPEED_STOP);
 	}
     glue_shoulder();
-    set_front_led(1);
+    set_front_led(true);
     VL53L0X_stop();
 }
 
@@ -53,26 +52,14 @@ static THD_FUNCTION(MoveRight, arg)
 
     	messagebus_topic_wait(proximity_topic, &proximity_values, sizeof(proximity_values));
 
-      //  adapt_speed (STOP , check_shoulder());
-
-    	while (1)//(stay_on_your_right()==true)
+    	while (1)
     	{
     		if (to_the_left()==true)
     		{
     			glue_shoulder();
     		}
     		adapt_speed(KEEP_STRAIGHT , check_shoulder());
-
     	}
-
-
-        /*
-         * if the line is nearly in front of an edge, slow down to turn
-         * adapt : to turn to the left, follow the right wall until a certain distance from the front wall, then turn,
-         * 			to turn to the right, once it stops detecting the right wall, it moves forward till the back sensor senses the right wall, then rotates.
-		*/
-
-        //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
 }
@@ -82,9 +69,7 @@ void move_right_start(void)
 	chThdCreateStatic(waMoveRight, sizeof(waMoveRight), NORMALPRIO, MoveRight, NULL);
 }
 
-
-
-uint8_t init_prox(void)
+static int init_prox(void)
 {
 	 messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
 	 messagebus_topic_wait(prox_topic, &proximity_values, sizeof(proximity_values));
@@ -95,7 +80,7 @@ uint8_t init_prox(void)
     while (i--)
     {
     	int max=0;
-    	for (unsigned int i=0; i<8; i++)
+        for (unsigned int i=0; i<NB_SENSORS; i++)
     	{
     		if (get_prox(i)>max)
     		{
@@ -108,18 +93,21 @@ uint8_t init_prox(void)
 }
 
 
-bool to_the_left (void)
+static bool to_the_left (void)
 {
-	return (get_prox(SENSOR_IR1)+get_prox(SENSOR_IR8) > 2*LIM_OBSTACLE_FACE );
+//	return (get_prox(SENSOR_IR1)+get_prox(SENSOR_IR8) > 2*LIM_OBSTACLE_FACE );
+    return (VL53L0X_get_dist_mm()<LIM_OBSTACLE_FACE);
 }
 
-int check_shoulder(void)
+static int check_shoulder(void)
 {
 
 	enum sense {nothing, far, close};
 	enum sense eye;
 	enum sense shoulder;
 
+    // function initialisation of values
+    
 	if (get_prox(SENSOR_IR2) > GOAL_IR2)
 	{
 		eye=close;
@@ -140,53 +128,38 @@ int check_shoulder(void)
 	}
 	else shoulder=far;
 
-	int speed;
+	float speed;
+    
+    // comparaisons and calculations of booleans
 
-	if (eye==close)													  // too close to the wall, turn a bit left
+	if (eye==close)											// too close to the wall, has to turn a bit left
 	{
-		speed=(get_prox(SENSOR_IR2)-GOAL_IR2)/(GOAL_IR2-MAX_IR2)*SPEEDK;
-		if (speed<-SPEEDK){speed=-SPEEDK;}
-		return speed;
+		speed=(get_prox(SENSOR_IR2)-GOAL_IR2)/(GOAL_IR2-MAX_IR2);
+		if (speed < - MAX_SPEED_MOD){speed = - MAX_SPEED_MOD;}                            // avoid to have speed above SPEEDK
+		return SPEEDK*speed;
 	}
-	if (eye==far && shoulder==far)									// voit qu'il est un peu loin avec son oeil
-																	// sent qu'il est trop loin du mur mais le voit encore
-																	// turn a bit right something positive
+	if (eye==far && shoulder==far)                          // too far from the wall, has to turn a bit right
 	{
-		return (GOAL_IR2-get_prox(SENSOR_IR2))/(GOAL_IR2-NOISE_IR2)*SPEEDK;
+        speed=(GOAL_IR2-get_prox(SENSOR_IR2))/(GOAL_IR2-NOISE_IR2);
+        if (speed > MAX_SPEED_MOD ){speed = MAX_SPEED_MOD;}                              // avoid to have speed above SPEEDK
+		return  SPEEDK * speed;
 	}
 
 
-	if (eye==nothing)											// voit rien avec son oeil droit
+	if (eye==nothing)
 	{
-		if (shoulder==close)									//mais sent avec son epaule
+		if (shoulder==close)
 		{
-			return SPEED_STOP;
+			return SPEED_STOP;                  //goes straight
 		}
 		else{
-			return SPEEDK;
+			return SPEEDK;                      // optimal speed to do a rotation around a point 1cm away
 		}
 
 	}
 
 return SPEED_STOP;
 }
-
- void verif (void)
- {
-	 while (1)
-	 {
-		chprintf((BaseSequentialStream *)&SD3, " prox values de  IR1 = %4d,  \n ", get_prox(SENSOR_IR1) );
-		chprintf((BaseSequentialStream *)&SD3, " prox values de  IR3 = %4d,  \n ", get_prox(SENSOR_IR3) );
-		chprintf((BaseSequentialStream *)&SD3, " prox values de  IR2 = %4d,  \n ", get_prox(SENSOR_IR2) );
-		chprintf((BaseSequentialStream *)&SD3, " prox values de  IR4 = %4d,  \n ", get_prox(SENSOR_IR4) );
-
-
-		chThdSleep(100);
-	 }
-
- }
-
-
 
 
 

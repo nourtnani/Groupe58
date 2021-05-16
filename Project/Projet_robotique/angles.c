@@ -19,7 +19,7 @@
 * 			as is.
 */
 
-double constrainAngle(double x)
+int constrainAngle(int x)
 {
     x = fmod(x + DEMI_CERCLE,CERCLE);
     if (x < 0)  x += CERCLE;
@@ -27,7 +27,7 @@ double constrainAngle(double x)
     return x - DEMI_CERCLE;
 }
 
-double angle_to_step(int angle)
+int angle_to_step(int angle)
 {
     return (TOUR_COMPLET/CERCLE)*constrainAngle(angle);
 }
@@ -41,35 +41,25 @@ void rotate_to_angle(int angle)
 {
     right_motor_set_pos(COUNTER_INIT);
     int steps = angle_to_step(angle);
-    if (steps<0)
+    if (steps<0) //turn right
     {
-    	//   turn right
-        //   53mm --> 166,5 de perimetre --> 4 tours complets de roue
-    	//	41 mm --> 128 de perim
-    	// 1 rot = 1000 steps --> tour complet = 1290 steps
-    	// pour faire un tour complet il faut 1290 step sur un gauche et -1290 sur droite
         right_motor_set_speed(-SPEED_WALK);
         left_motor_set_speed(+SPEED_WALK);
         while (right_motor_get_pos()>(COUNTER_INIT+steps))
         {
-            chThdSleep(10);
-          //  chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
+          //  chThdSleep(10);
 
         }
         right_motor_set_speed(SPEED_STOP);
         left_motor_set_speed(SPEED_STOP);
     }
-    else
+    else //turn left
     {
-        //        turn left
-        // 1 rot = 1000 steps --> tour complet = 1290 steps
-        // pour faire un tour complet il faut 1290 step sur un droite et -1290 sur gauche
         right_motor_set_speed(+SPEED_WALK);
         left_motor_set_speed(-SPEED_WALK);
         while (right_motor_get_pos()<(COUNTER_INIT+steps))
         {
-            chThdSleep(10);
-          //  chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
+          //  chThdSleep(10);
         }
         right_motor_set_speed(SPEED_STOP);
         left_motor_set_speed(SPEED_STOP);
@@ -111,7 +101,7 @@ void rotate_to_sensor(int sensor)
 
 void glue_shoulder(void)
 {
-	while(init_prox()!=SENSOR_IR3)
+	while(init_prox()!=SENSOR_IR3) //if the sensor giving back the highest value is not the IR3, keep rotating
 	{
 		rotate_to_angle(A_SENSOR_IR8);
 	}
@@ -134,11 +124,11 @@ void adapt_speed (int cas , int16_t speed_correction)
 
 }
 
-void move (int valeur , int16_t speed_correction)
+void move (float valeur , int16_t speed_correction)
 {
 	right_motor_set_pos (SPEED_STOP);
 	left_motor_set_pos (SPEED_STOP);
-	while (right_motor_get_pos()<= valeur)
+	while (right_motor_get_pos()<= valeur) //same logic as rotate, we keep checking
 	{
 		right_motor_set_speed (SPEED_WALK - ROTATION_COEFF * speed_correction);
 		left_motor_set_speed (SPEED_WALK - ROTATION_COEFF * speed_correction);

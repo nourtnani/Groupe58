@@ -21,33 +21,16 @@
  /**
  * @brief   This function compares the values measured by all the sensors
  * 			and returns the maximal value.
- * 			NOTE : the closer the obstacle is, the larger is the value transmitted by the captors.
+ * 			NOTE : the closer the obstacle is, the larger is the value transmitted by the captors. This function is private.
  */
-uint8_t init_prox(void);
+// int init_prox(void);
 
  /**
  * @brief   Function useful for the edges.
  * 			If it returns true, the robot should turn to the left.
- * 			It compares the values measured by IR1 and IR8 to threshold
- * 			values determined experimentally (LIM_OBSTACLE_FACE).
+ * 			It compares the values measured by the TOF sensor to a goal value. This function is private.
  */
-bool to_the_left (void);
-
-/**
-* @brief   This function verifies that the robot has the wall on its right.
-* 			It compares the values measured by IR3 to a threshold value
-* 			determined experimentally (LIM_OBSTACLE)
-*/
-bool stay_on_your_right (void);
-
-/**
-* @brief  This function verifies if the robot sees something on its right.
-* 			It compares the values measured by IR2 and IR3 to noise values
-* 			determined experimentally (NOISE_IR3 & NOISE)
-* 			It is useful when the robot has to get around edges, so it has to
-* 			move forward a little.
-*/
-bool see_nothing (void) ;
+// bool to_the_left (void);
 
 /**
 * @brief   This function returns a correction coefficient for the speed of the motors.
@@ -55,9 +38,9 @@ bool see_nothing (void) ;
 * 			by IR2 and IR3 to threshold and noise values.
 * 			It allows the robot to always follow the obstacles on its right, and therefore
 * 			turning right when it should.
-* 			The correction applies only for a motor's speed = 200.
+* 			The correction applies only for a motor's speed = 200. This function is privateche
 */
-int check_shoulder(void) ;
+// int check_shoulder(void) ;
 
 /**
 * @brief   Starts the labyrinth check unit
