@@ -36,8 +36,8 @@ static THD_FUNCTION(FallMonitoring, arg)
 	systime_t time;
 	messagebus_topic_t *imu_topic = messagebus_find_topic_blocking(&bus, "/imu");
 
-	int16_t noise_z = -15000 ;
-	int16_t noise_gyr_x = 7000 ;
+	int16_t threshold_acc = -3000 ;
+	int16_t threshold_gyro = 6000 ;
 
 	while(1)
 	{
@@ -49,38 +49,16 @@ static THD_FUNCTION(FallMonitoring, arg)
                 get_acc(X_AXIS), get_acc(Y_AXIS), get_acc(Z_AXIS),
 				get_gyro(X_AXIS), get_gyro(Y_AXIS), get_gyro(Z_AXIS));
 
-        if ((get_acc(Z_AXIS) < noise_z))
+        if ((get_acc(Y_AXIS) < threshold_acc) && (get_gyro(X_AXIS) > threshold_gyro))
         {
-        	if (get_gyro(X_AXIS) > noise_gyr_x)
-        	{
                 adapt_speed (STOP , SPEED_STOP);
             	playMelody(WE_ARE_THE_CHAMPIONS , ML_FORCE_CHANGE , NULL);
             	waitMelodyHasFinished();
                 adapt_speed (STOP , SPEED_STOP);
-        	}
-        	else   stopCurrentMelody();
         }
 
-
-       /* if(get_acc(Z_AXIS) > noise_z)
-		    	{
-		    		if((get_gyr(X_AXIS)+get_gyr(Y_AXIS)) > noise_gyr)
-		    		{
-		    			// turn all leds and bip
-		    			set_led(0,1);
-		    			set_led(1,1);
-		    			set_led(2,1);
-		    			set_led(3,1);
-
-		    		}
-		    		else
-		    		{
-		    			left_motor_set_speed(MAXSPEED);
-		    			righ_motor_set_speed(MAXSPEED);
-		    		}
-		    	}
-*/
-		    }
+    	else   stopCurrentMelody();
+	}
 
     //100Hz
     chThdSleepUntilWindowed(time, time + MS2ST(10));

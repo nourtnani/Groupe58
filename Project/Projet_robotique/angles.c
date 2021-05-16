@@ -50,7 +50,7 @@ void rotate_to_angle(int angle)
         while (right_motor_get_pos()>(5000+steps))
         {
             chThdSleep(10);
-            chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
+          //  chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
 
         }
         right_motor_set_speed(SPEED_STOP);
@@ -66,7 +66,7 @@ void rotate_to_angle(int angle)
         while (right_motor_get_pos()<(5000+steps))
         {
             chThdSleep(10);
-            chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
+          //  chprintf((BaseSequentialStream *)&SD3, "compteur moteur: %d\n", right_motor_get_pos());
         }
         right_motor_set_speed(SPEED_STOP);
         left_motor_set_speed(SPEED_STOP);
@@ -78,35 +78,27 @@ void rotate_to_sensor(int sensor)
     switch (sensor)
     {
         case SENSOR_IR1:
-        	set_led (LED1,1);
         	rotate_to_angle(A_SENSOR_IR1);
             break;
         case SENSOR_IR2:
-        	set_rgb_led (LED2,100,0,0);
             rotate_to_angle(A_SENSOR_IR2);
             break;
         case SENSOR_IR3:
-        	set_led (LED3,1);
             rotate_to_angle(A_SENSOR_IR3);
             break;
         case SENSOR_IR4:
-        	set_rgb_led (LED4,100,0,0);
             rotate_to_angle(A_SENSOR_IR4);
             break;
         case SENSOR_IR5:
-        	set_led (LED5,1);
             rotate_to_angle(A_SENSOR_IR5);
             break;
         case SENSOR_IR6:
-        	set_rgb_led (LED6,100,0,0);
             rotate_to_angle(A_SENSOR_IR6);
             break;
         case SENSOR_IR7:
-        	set_led (LED7,1);
             rotate_to_angle(A_SENSOR_IR7);
             break;
         case SENSOR_IR8:
-        	set_rgb_led (LED8,100,0,0);
             rotate_to_angle(A_SENSOR_IR8);
             break;
         default:

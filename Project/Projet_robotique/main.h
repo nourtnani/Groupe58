@@ -28,6 +28,7 @@ extern "C" {
 #define A_SENSOR_IR6	 	 	90
 #define A_SENSOR_IR7		 	50
 #define A_SENSOR_IR8		 	20
+
 #define A_TURN_RIGHT			-90
 #define A_TURN_LEFT 			90
 
@@ -39,7 +40,7 @@ extern "C" {
 #define LIM_OBSTACLE 			300
 #define LIM_OBSTACLE_FACE		1600
 #define NOISE 					100
-#define NOISE_IR3				400
+#define NOISE_IR3				450
 
 #define SPEED_WALK 				200
 #define SPEED_STOP 				0

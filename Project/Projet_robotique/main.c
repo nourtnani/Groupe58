@@ -47,9 +47,6 @@ messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
 
-//messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
-
-//proximity_msg_t prox_values;
 
 int main(void)
 {
@@ -66,20 +63,14 @@ int main(void)
     imu_start();
     calibrate_gyro();
     calibrate_acc();
-	//mic_start(NULL);
     dac_start();
     playMelodyStart();
-
 
     motors_init();
 
    // verif ();
 
-
-   // messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
-
-   // labyrinth_start();
-
+    labyrinth_start();
     move_right_start();
     fall_monitoring_start();
 

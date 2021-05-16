@@ -18,17 +18,16 @@
 
 proximity_msg_t proximity_values;
 
-
 void labyrinth_start(void)
 {
 	int number = init_prox();
     rotate_to_sensor(number);
 //    avancer jusqu'à l'obstacle
     //rotate_to_sensor(SENSOR_IR6);
-    while(init_prox()!=2)
-    {
-    	rotate_to_angle(-20);
-    }
+  //  while(init_prox()!=2)
+  //  {
+   // 	rotate_to_angle(-20);
+  //  }
     set_body_led(1);
 }
 
@@ -114,7 +113,7 @@ uint8_t init_prox(void)
     			number=i;
     		}
     	}
-    	chThdSleep(10);
+    	//chThdSleep(10);
     }
     return number;
 }
@@ -200,17 +199,13 @@ int check_shoulder(void)
 
 	if (eye==nothing)											// voit rien avec son oeil droit
 	{
-		//return (treshold_IR3-get_prox(SENSOR_IR3))/(treshold_IR3-noise_IR3);
-
 		if (shoulder==close)									//mais sent avec son epaule
 		{
 			return (treshold_IR3-get_prox(SENSOR_IR3))/(treshold_IR3-noise_IR3);
-
-			//return SPEED_STOP;
 		}
 		if (((shoulder==far)) || ((shoulder == nothing)&& back == far))
 		{
-			return (treshold_IR3-get_prox(SENSOR_IR3))/(treshold_IR3-noise_IR3)*speedk*2;
+			return (treshold_IR3-get_prox(SENSOR_IR3))/(treshold_IR3-noise_IR3)*speedk*ROTATION_COEFF;
 		}
 
 	}
@@ -230,7 +225,6 @@ return SPEED_STOP;
 
 		chThdSleep(100);
 	 }
-
 
  }
 
