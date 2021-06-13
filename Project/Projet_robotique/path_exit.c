@@ -24,7 +24,6 @@
 #include <audio/play_melody.h>
 
 
-imu_msg_t imu_values;
 
 
 static THD_WORKING_AREA(waFallMonitoring, 1024);
@@ -32,7 +31,7 @@ static THD_FUNCTION(FallMonitoring, arg)
 {
 	chRegSetThreadName(__FUNCTION__);
 	(void)arg;
-
+    imu_msg_t imu_values;
 	systime_t time;
 	messagebus_topic_t *imu_topic = messagebus_find_topic_blocking(&bus, "/imu");
 
