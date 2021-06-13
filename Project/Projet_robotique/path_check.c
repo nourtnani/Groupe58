@@ -50,11 +50,11 @@ static THD_FUNCTION(MoveRight, arg)
 
     	messagebus_topic_wait(proximity_topic, &proximity_values, sizeof(proximity_values));
 
-    		if (to_the_left()==true)
+    		if (to_the_left(&proximity_values)==true)
     		{
     			glue_shoulder();
     		}
-    		adapt_speed(check_shoulder());
+    		adapt_speed(check_shoulder(&proximity_values));
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
 }
@@ -66,16 +66,17 @@ void move_right_start(void)
 
 int init_prox(void)
 {
-
+    messagebus_topic_t *proximity_topic = messagebus_find_topic_blocking(&bus, "/proximity");
+    proximity_msg_t proximity_values;
     uint8_t number = 0;
 
 
     	int max=0;
         for (unsigned int i=0; i<NB_SENSORS; i++)
     	{
-    		if (get_prox(i)>max)
+    		if (proximity_values.delta[i]>max)
     		{
-                max=get_prox(i);
+                max=proximity_values.delta[i];
     			number=i;
     		}
             
@@ -84,12 +85,12 @@ int init_prox(void)
 }
 
 
-bool to_the_left (void)
+bool to_the_left (proximity_msg_t *proximity_values)
 {
-	return ((proximity_values.delta[SENSOR_IR1]+proximity_values.delta[SENSOR_IR8])/2 > LIM_OBSTACLE_FACE );  //Comparison between the average value and the threshold
+	return ((proximity_values->delta[SENSOR_IR1]+proximity_values->delta[SENSOR_IR8])/2 > LIM_OBSTACLE_FACE );  //Comparison between the average value and the threshold
 }
 
-int check_shoulder(void)
+int check_shoulder(proximity_msg_t *proximity_values)
 {
 
 	enum sense {nothing, far, close};
@@ -98,21 +99,21 @@ int check_shoulder(void)
 
     // function initialisation of values
     
-	if (proximity_values.delta[SENSOR_IR2] > GOAL_IR2)
+	if (proximity_values->delta[SENSOR_IR2] > GOAL_IR2)
 	{
 		eye=close;
 	}
-	else if (proximity_values.delta[SENSOR_IR2] < NOISE_IR2)
+	else if (proximity_values->delta[SENSOR_IR2] < NOISE_IR2)
 	{
 		eye=nothing;
 	}
 	else eye=far;
 
-	if (proximity_values.delta[SENSOR_IR3] > GOAL_IR3)
+	if (proximity_values->delta[SENSOR_IR3] > GOAL_IR3)
 	{
 		shoulder=close;
 	}
-	else if (proximity_values.delta[SENSOR_IR3] < NOISE_IR3)
+	else if (proximity_values->delta[SENSOR_IR3] < NOISE_IR3)
 	{
 		shoulder=nothing;
 	}
@@ -124,7 +125,7 @@ int check_shoulder(void)
 
 	if (eye==close)														// too close to the wall, has to turn a bit left
 	{
-		speed=(proximity_values.delta[SENSOR_IR2]-GOAL_IR2)/(GOAL_IR2-MAX_IR2);
+		speed=(proximity_values->delta[SENSOR_IR2]-GOAL_IR2)/(GOAL_IR2-MAX_IR2);
 		if (speed < - MAX_SPEED_MOD)
 		{
 			speed = - MAX_SPEED_MOD;
@@ -133,7 +134,7 @@ int check_shoulder(void)
 	}
 	if (eye==far && shoulder==far)                          // too far from the wall, has to turn a bit right
 	{
-        speed=(GOAL_IR2-proximity_values.delta[SENSOR_IR2])/(GOAL_IR2-NOISE_IR2);
+        speed=(GOAL_IR2-proximity_values->delta[SENSOR_IR2])/(GOAL_IR2-NOISE_IR2);
         if (speed > MAX_SPEED_MOD )
         {
         	speed = MAX_SPEED_MOD;

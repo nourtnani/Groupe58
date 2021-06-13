@@ -35,7 +35,7 @@ static THD_FUNCTION(FallMonitoring, arg)
 	messagebus_topic_t *imu_topic = messagebus_find_topic_blocking(&bus, "/imu");
     imu_msg_t imu_values;
 
-	float init_gyro = get_gyro_rate(X_AXIS);
+	float init_gyro = imu_values.gyro_rate(X_AXIS);
 
 	while(1)
 	{
@@ -43,7 +43,7 @@ static THD_FUNCTION(FallMonitoring, arg)
         //wait for new measures to be published
         messagebus_topic_wait(imu_topic, &imu_values, sizeof(imu_values));
         stopCurrentMelody();
-        if (abs( get_gyro_rate(X_AXIS) - init_gyro)  > ANGULAR_ACC_DEATH )
+        if (abs( imu_values.gyro_rate(X_AXIS) - init_gyro)  > ANGULAR_ACC_DEATH )
         {
             	playMelody(MARIO_DEATH , ML_FORCE_CHANGE , NULL);
             	waitMelodyHasFinished();
