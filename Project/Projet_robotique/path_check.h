@@ -30,7 +30,7 @@ int init_prox(void);
  * 			If it returns true, the robot should turn to the left.
  * 			It compares the values measured by the TOF sensor to a goal value.
  */
-bool to_the_left (void);
+bool to_the_left (proximity_msg_t *proximity_values);
 
 /**
 * @brief   This function returns a correction coefficient for the speed of the motors.
@@ -39,7 +39,7 @@ bool to_the_left (void);
 * 			It allows the robot to always follow the obstacles on its right, and therefore
 * 			turning right when it should.
 */
-int check_shoulder(void) ;
+int check_shoulder(proximity_msg_t *proximity_values) ;
 
 /**
 * @brief   Starts the labyrinth check unit
